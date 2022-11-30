@@ -2,82 +2,114 @@ let p5Instance;
 const windowHeight = window.innerHeight;
 const windowWidth = window.innerWidth;
 
+let ASSET_LOCATION = {
+    images: {
+        character_idle: "assets/characters/character_idle.png",
+        character_arm_raised: "assets/characters/character_arm_raised.png",
+    },
+};
+
+let IMAGES = {};
+
 window.onload = function () {
     p5Instance = new p5(s, "container");
 };
 
-const MODELS = {
-    GUY: {
-        model: "assets/guy/model.obj",
-        texture: "assets/guy/text.bmp",
-    },
-    LADY: {
-        model: "assets/lady/Woman.obj",
-        texture: "assets/lady/woman.png",
-    },
-};
-
 const s = (sketch) => {
-    let guyModel, ladyModel;
-    let guyTexture, ladyTexture;
-    let guy1, guy2, lady1, lady2;
-    let camera;
+    let characters = [];
 
-    let rows = 2;
-    let cols = 2;
-    let gridStartX = -100;
-    let gridStartY = -100;
-    let gridWidth = 250;
-    let gridHeight = 250;
-
-    let grid = [];
+    sketch.preload = () => {
+        IMAGES.character_idle = sketch.loadImage(
+            ASSET_LOCATION.images.character_idle
+        );
+        IMAGES.character_arm_raised = sketch.loadImage(
+            ASSET_LOCATION.images.character_arm_raised
+        );
+    };
 
     sketch.setup = () => {
-        sketch.createCanvas(windowWidth, windowHeight, sketch.WEBGL);
+        sketch.createCanvas(windowWidth, windowHeight);
+        sketch.frameRate(60);
 
-        // Load models
-        // guyModel = sketch.loadModel(MODELS.GUY.model, true);
-        ladyModel = sketch.loadModel(MODELS.LADY.model, true);
+        // Row 1
+        let student1 = new Student(sketch, 100, 100, "Student 1");
+        let student2 = new Student(sketch, 250, 100, "Student 2");
+        let student3 = new Student(sketch, 400, 100, "Student 3");
+        let student4 = new Student(sketch, 550, 100, "Student 4");
+        // Row 2
+        let student5 = new Student(sketch, 100, 250, "Student 5");
+        let student6 = new Student(sketch, 250, 250, "Student 6");
+        let student7 = new Student(sketch, 400, 250, "Student 7");
+        let student8 = new Student(sketch, 550, 250, "Student 8");
 
-        // Load textures
-        // guyTexture = sketch.loadImage(MODELS.GUY.texture);
-        ladyTexture = sketch.loadImage(MODELS.LADY.texture);
-
-        lady1 = new Avatar(sketch, 0, 0, 0, { model: ladyModel, texture: ladyTexture });
-
-        camera = sketch.createCamera();
+        characters.push(student1);
+        characters.push(student2);
+        characters.push(student3);
+        characters.push(student4);
+        characters.push(student5);
+        characters.push(student6);
+        characters.push(student7);
+        characters.push(student8);
     };
 
     sketch.draw = () => {
-        camera.setPosition(0, 0, 500);
-        camera.lookAt(0, 0, 0);
+        sketch.background(255);
 
-        sketch.background(250);
-
-        lady1.draw();
+        characters.forEach((character) => {
+            character.draw();
+        });
     };
 };
 
-class Avatar {
-    constructor(sketch, x, y, z, modelTex) {
+class Student {
+    constructor(sketch, x, y, name) {
         this.x = x;
         this.y = y;
-        this.z = z;
         this.sketch = sketch;
+        this.name = name;
+        this.state = "idle";
 
-        this.model = modelTex.model;
-        this.texture = modelTex.texture;
+        this.width = 150;
+        this.height = 150;
     }
 
-    draw(camera) {
-        this.sketch.push();
-        this.sketch.noStroke();
-        this.sketch.translate(this.x, this.y, this.z);
-        this.sketch.rotateX(this.sketch.frameCount * 0.01);
-        this.sketch.rotateY(this.sketch.frameCount * 0.01);
+    draw() {
+        if (this.state === "idle") {
+            this.sketch.image(
+                IMAGES.character_idle,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
+        } else if (this.state === "arm_raised") {
+            this.sketch.image(
+                IMAGES.character_arm_raised,
+                this.x,
+                this.y,
+                this.width,
+                this.height
+            );
+        }
 
-        this.sketch.texture(this.texture);
-        this.sketch.model(this.model);
-        this.sketch.pop();
+        this.addText(this.name);
+    }
+
+    addText(text) {
+        let offsetX = this.width / 2;
+        let offsetYPercent = 60;
+        let offsetY = (this.height / 100) * offsetYPercent;
+        let fontSizePercent = 8;
+        let fontSize = (this.height / 100) * fontSizePercent;
+
+        // Trim text if too long
+        if (text.length > 10) {
+            text = text.substring(0, 10) + "...";
+        }
+
+        // Center text
+        this.sketch.textAlign(this.sketch.CENTER, this.sketch.CENTER);
+        this.sketch.textSize(fontSize);
+        this.sketch.text(text, this.x + offsetX, this.y + offsetY);
     }
 }
