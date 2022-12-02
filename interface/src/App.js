@@ -18,6 +18,8 @@ export default function App() {
         });
 
         return () => {
+            socket.off("connect");
+            socket.off("Error");
             socket.disconnect();
         };
     }, []);

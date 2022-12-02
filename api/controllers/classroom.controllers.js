@@ -97,6 +97,7 @@ const create_classroom = (io, socket, { hostName, hostPassword }) => {
                 success: true,
                 message: "Created Classroom",
                 classroomId: classroom.id,
+                joinPassword: classroom.joinPassword,
             });
         })
         .catch((err) => {

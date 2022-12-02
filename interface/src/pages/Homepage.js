@@ -5,30 +5,51 @@ import { toast } from "react-toastify";
 function Homepage() {
     const [socket] = useOutletContext();
 
+    const [showSuccess, setShowSuccess] = React.useState(false);
+    const [successText, setSuccessText] = React.useState("");
+
     useEffect(() => {
         socket.on("create_classroom", (data) => {
             console.log(data);
+            setSuccessText(data);
+            setShowSuccess(true);
             toast.success("Classroom created successfully");
         });
 
         socket.on("join_classroom", (data) => {
             console.log(data);
+            if (data.host) {
+                setSuccessText(data);
+                setShowSuccess(true);
+            }
             toast.success("Joined classroom successfully");
         });
+
+        return () => {
+            socket.off("create_classroom");
+            socket.off("join_classroom");
+        };
     }, []);
 
     const newClassroom = () => {
+        let hostName = prompt("Enter your name");
+        let hostPassword = prompt("Enter a master password");
+
         socket.emit("create_classroom", {
-            hostName: "Bishnu",
-            hostPassword: "1234",
+            hostName,
+            hostPassword,
         });
     };
 
     const joinClassroom = () => {
+        let username = prompt("Enter your name");
+        let classroomId = prompt("Enter the classroom ID");
+        let joinPassword = prompt("Enter the join password");
+
         socket.emit("join_classroom", {
-            classroomId: "5f6d2e61-ef7b-4987-a82a-720da63b1863",
-            joinPassword: "1234",
-            username: "Bishnu",
+            username,
+            classroomId,
+            joinPassword,
         });
     };
 
@@ -59,6 +80,18 @@ function Homepage() {
                     >
                         Join Classroom
                     </a>
+                </div>
+
+                <div>
+                    <div
+                        className={
+                            "mt-4 alert alert-success " +
+                            (!showSuccess ? "d-none" : "")
+                        }
+                        role="alert"
+                    >
+                        {<pre>{JSON.stringify(successText, null, 2)}</pre>}
+                    </div>
                 </div>
             </div>
         </div>
