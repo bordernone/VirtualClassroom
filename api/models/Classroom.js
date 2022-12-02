@@ -3,8 +3,8 @@ const sequelize = require("../database/sequelize");
 
 const Classroom = sequelize.define("Classroom", {
     id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
+        type: DataTypes.UUID,
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
     },
     hostName: {

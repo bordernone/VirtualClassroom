@@ -1,42 +1,53 @@
 const { Classroom } = require("../models/init");
 
-const join_classroom = (io, socket, classroomId, joinPassword) => {
-    if (classroomId && joinPassword) {
-        // Get the classroom
-        Classroom.findOne({
-            where: {
-                id: classroomId,
-                joinPassword: joinPassword,
-            },
-        })
-            .then((classroom) => {
+const join_classroom = (
+    io,
+    socket,
+    { classroomId, joinPassword, username }
+) => {
+    // If the user is the host
+    Classroom.findOne({
+        where: {
+            id: classroomId,
+            hostPassword: joinPassword,
+            hostName: username,
+        },
+    }).then((classroom) => {
+        if (classroom) {
+            socket.join(classroom.id);
+            socket.emit("join_classroom", {
+                classroomId: classroom.id,
+                host: true,
+            });
+        } else {
+            // If the user is a student
+            Classroom.findOne({
+                where: {
+                    id: classroomId,
+                    joinPassword: joinPassword,
+                },
+            }).then((classroom) => {
                 if (classroom) {
-                    // Check number of students in the socket room
+                    // Check number of students in the socket room, max 8
                     const room = io.sockets.adapter.rooms[classroomId];
-                    if (room && room.length >= 2) {
-                        socket.join(classroomId);
-                        console.log("Joined Classroom: ", classroomId);
-                        socket.emit("join_classroom", {
-                            success: true,
-                            message: "Joined Classroom",
-                        });
+                    if (!room || room.length >= 8) {
+                        socket.emit(
+                            "Error",
+                            "Classroom is full or hasn't started"
+                        );
                     } else {
-                        socket.emit("Error", "Classroom is full or hasn't started");
-                        console.log("Classroom is full");
+                        socket.join(classroom.id);
+                        socket.emit("join_classroom", {
+                            classroomId: classroom.id,
+                            host: false,
+                        });
                     }
                 } else {
-                    socket.emit(
-                        "Error",
-                        "Invalid Classroom ID or Join Password"
-                    );
+                    socket.emit("Error", "Invalid Password");
                 }
-            })
-            .catch((err) => {
-                console.log(err);
             });
-    } else {
-        socket.emit("Error", "Invalid Classroom ID or Join Password");
-    }
+        }
+    });
 };
 
 const start_classroom = (io, socket, classroomId, hostPassword) => {
@@ -71,4 +82,27 @@ const start_classroom = (io, socket, classroomId, hostPassword) => {
     }
 };
 
-module.exports = { join_classroom, start_classroom };
+const create_classroom = (io, socket, { hostName, hostPassword }) => {
+    // Generate a random join password
+    const joinPassword = Math.random().toString(36).substring(2, 15);
+
+    // Create the classroom
+    Classroom.create({
+        hostName: hostName,
+        hostPassword: hostPassword,
+        joinPassword: joinPassword,
+    })
+        .then((classroom) => {
+            socket.emit("create_classroom", {
+                success: true,
+                message: "Created Classroom",
+                classroomId: classroom.id,
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+            socket.emit("Error", "Error creating classroom");
+        });
+};
+
+module.exports = { join_classroom, start_classroom, create_classroom };
