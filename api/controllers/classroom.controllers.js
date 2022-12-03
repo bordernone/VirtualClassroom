@@ -6,52 +6,58 @@ const join_classroom = (
     { classroomId, joinPassword, username }
 ) => {
     // If the user is the host
+    console.log("Hey");
     Classroom.findOne({
         where: {
             id: classroomId,
             hostPassword: joinPassword,
             hostName: username,
         },
-    }).then((classroom) => {
-        if (classroom) {
-            socket.join(classroom.id);
-            socket.emit("join_classroom", {
-                classroomId: classroom.id,
-                host: true,
-                username: username,
-                joinPassword: joinPassword,
-            });
-        } else {
-            // If the user is a student
-            Classroom.findOne({
-                where: {
-                    id: classroomId,
+    })
+        .then((classroom) => {
+            if (classroom) {
+                socket.join(classroom.id);
+                socket.emit("join_classroom", {
+                    classroomId: classroom.id,
+                    host: true,
+                    username: username,
                     joinPassword: joinPassword,
-                },
-            }).then((classroom) => {
-                if (classroom) {
-                    // Check number of students in the socket room, max 8
-                    const room = io.sockets.adapter.rooms[classroomId];
-                    if (!room || room.length >= 8) {
-                        socket.emit(
-                            "Error",
-                            "Classroom is full or hasn't started"
-                        );
+                });
+            } else {
+                console.log("Student joined");
+                // If the user is a student
+                Classroom.findOne({
+                    where: {
+                        id: classroomId,
+                        joinPassword: joinPassword,
+                    },
+                }).then((classroom) => {
+                    if (classroom) {
+                        // Check number of students in the socket room, max 8
+                        const room = io.sockets.adapter.rooms.get(classroom.id);
+                        if (!room || room.length >= 8) {
+                            socket.emit(
+                                "Error",
+                                "Classroom is full or hasn't started"
+                            );
+                        } else {
+                            socket.join(classroom.id);
+                            socket.emit("join_classroom", {
+                                classroomId: classroom.id,
+                                host: false,
+                                username: username,
+                                joinPassword: joinPassword,
+                            });
+                        }
                     } else {
-                        socket.join(classroom.id);
-                        socket.emit("join_classroom", {
-                            classroomId: classroom.id,
-                            host: false,
-                            username: username,
-                            joinPassword: joinPassword,
-                        });
+                        socket.emit("Error", "Invalid Password");
                     }
-                } else {
-                    socket.emit("Error", "Invalid Password");
-                }
-            });
-        }
-    });
+                });
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 };
 
 const start_classroom = (_io, socket, classroomId, hostPassword) => {
