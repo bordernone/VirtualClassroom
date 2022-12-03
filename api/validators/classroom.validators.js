@@ -32,8 +32,16 @@ const drawWhiteboardValidator = (payload) => {
     return schema.validate(payload);
 };
 
+const studentsUpdateValidator = (payload) => {
+    const schema = Joi.object({
+        classroomId: Joi.string().required(),
+    });
+    return schema.validate(payload);
+};
+
 module.exports = {
     createClassroomValidator,
     joinClassroomValidator,
     drawWhiteboardValidator,
+    studentsUpdateValidator,
 };

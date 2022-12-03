@@ -13,6 +13,7 @@ const {
     createClassroomValidator,
     joinClassroomValidator,
     drawWhiteboardValidator,
+    studentsUpdateValidator,
 } = require("./validators/classroom.validators");
 const { instrument } = require("@socket.io/admin-ui");
 const cors = require("cors");
@@ -85,6 +86,15 @@ io.on("connection", (socket) => {
             socket.emit("Error", error.details[0].message);
         } else {
             draw_whiteboard(io, socket, data);
+        }
+    });
+
+    socket.on("students_update", (data) => {
+        const { error } = studentsUpdateValidator(data);
+        if (error) {
+            socket.emit("Error", error.details[0].message);
+        } else {
+            update_students(io, data.classroomId);
         }
     });
 });

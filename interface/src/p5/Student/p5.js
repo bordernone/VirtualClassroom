@@ -48,10 +48,21 @@ class StudentsP5 extends React.Component {
                 }
             );
         });
+
+        // Ping the server to get the students data
+        this.socket.emit("students_update", {
+            classroomId: this.state.classroomId,
+        });
+        this.listener = setInterval(() => {
+            this.socket.emit("students_update", {
+                classroomId: this.state.classroomId,
+            });
+        }, 5000);
     }
 
     componentWillUnmount() {
         this.socket.off("students_update");
+        clearInterval(this.listener);
     }
 
     setupCharacters = (p5) => {
@@ -90,7 +101,11 @@ class StudentsP5 extends React.Component {
         p5.background(255);
 
         this.characters.forEach((character) => {
-            character.draw();
+            try {
+                character.draw();
+            } catch (e) {
+                // console.log(e);
+            }
         });
     };
 

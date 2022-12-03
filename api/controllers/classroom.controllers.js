@@ -37,10 +37,10 @@ const join_classroom = (
                     if (classroom) {
                         // Check number of students in the socket room, max 8
                         const room = io.sockets.adapter.rooms.get(classroom.id);
-                        if (!room || room.length >= 8) {
+                        if (room && room.length >= 8) {
                             socket.emit(
                                 "Error",
-                                "Classroom is full or hasn't started"
+                                "Classroom is or hasn't started"
                             );
                         } else {
                             socket.data.isHost = false;
@@ -163,24 +163,26 @@ const draw_whiteboard = (
 
 const update_students = (io, classroomId) => {
     // Get all the students in the classroom
-    let students = io.sockets.adapter.rooms.get(classroomId);
-    students = Array.from(students);
+    try {
+        let students = io.sockets.adapter.rooms.get(classroomId);
+        students = Array.from(students);
 
-    const studentsSocket = students.map((student) => {
-        return io.sockets.sockets.get(student);
-    });
-    const studentSocketData = studentsSocket.map((student) => {
-        return { data: student.data, id: student.id };
-    });
+        const studentsSocket = students.map((student) => {
+            return io.sockets.sockets.get(student);
+        });
+        const studentSocketData = studentsSocket.map((student) => {
+            return { data: student.data, id: student.id };
+        });
 
-    // Exclude the host from the students
-    const studentsData = studentSocketData.filter(
-        (student) => student.data.isHost === false
-    );
+        // Exclude the host from the students
+        const studentsData = studentSocketData.filter(
+            (student) => student.data.isHost === false
+        );
 
-    console.log(classroomId, studentSocketData);
-
-    io.to(classroomId).emit("students_update", studentSocketData);
+        io.to(classroomId).emit("students_update", studentsData);
+    } catch (err) {
+        console.log(err);
+    }
 };
 
 module.exports = {
