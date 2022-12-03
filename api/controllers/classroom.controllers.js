@@ -6,7 +6,6 @@ const join_classroom = (
     { classroomId, joinPassword, username }
 ) => {
     // If the user is the host
-    console.log("Hey");
     Classroom.findOne({
         where: {
             id: classroomId,
@@ -24,7 +23,6 @@ const join_classroom = (
                     joinPassword: joinPassword,
                 });
             } else {
-                console.log("Student joined");
                 // If the user is a student
                 Classroom.findOne({
                     where: {

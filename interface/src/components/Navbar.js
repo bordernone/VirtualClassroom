@@ -18,7 +18,7 @@ function Navbar() {
                 >
                     <span className="navbar-toggler-icon" />
                 </button>
-                <div
+                {/* <div
                     className="collapse navbar-collapse"
                     id="navbarSupportedContent"
                 >
@@ -33,7 +33,7 @@ function Navbar() {
                             </a>
                         </li>
                     </ul>
-                </div>
+                </div> */}
             </div>
         </nav>
     );

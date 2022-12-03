@@ -11,7 +11,6 @@ import WhiteboardP5, {
 
 function Classroom() {
     const [socket] = useOutletContext();
-    const { classroomId } = useParams();
     const { state } = useLocation();
 
     useEffect(() => {
@@ -30,7 +29,7 @@ function Classroom() {
                     boxSizing: "content-box",
                 }}
             >
-                <StudentsP5 />
+                <StudentsP5 socket={socket} state={state}/>
             </div>
 
             <div
