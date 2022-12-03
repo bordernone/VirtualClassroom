@@ -1,7 +1,8 @@
+import { Buffer } from "buffer";
 import React, { useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
+import { CopyBlock, dracula } from "react-code-blocks";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 
 function Homepage() {
     const [socket] = useOutletContext();
@@ -90,7 +91,7 @@ function Homepage() {
                         className="btn btn-primary"
                         onClick={() => setShowJoinForm(!showJoinForm)}
                     >
-                        Join Classroom
+                        Start Classroom
                     </a>
                 </div>
 
@@ -103,6 +104,26 @@ function Homepage() {
                         role="alert"
                     >
                         {<pre>{JSON.stringify(successText, null, 2)}</pre>}
+
+                        {successText.classroomId && (
+                            <>
+                                Join as participant: <small>(share this link with participants)</small>
+                                <CopyBlock
+                                    language="go"
+                                    text={
+                                        "http://localhost:3000/classroom/" +
+                                        successText.classroomId +
+                                        "?joinPassword=" +
+                                        Buffer.from(
+                                            successText.joinPassword
+                                        ).toString("base64")
+                                    }
+                                    codeBlock
+                                    theme={dracula}
+                                    showLineNumbers={false}
+                                />
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -147,7 +168,7 @@ function Homepage() {
                                     required
                                 />
                                 <label htmlFor="joinPassword">
-                                    Enter classroom join password
+                                    Enter classroom password
                                 </label>
                             </div>
                             <div className="d-grid">

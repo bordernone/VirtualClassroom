@@ -9,11 +9,67 @@ export const StudentsCanvasHeight = 400;
 export const StudentsCanvasWidth = 600;
 
 class StudentsP5 extends React.Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
+
+        this.p5 = null;
+
         this.characters = [];
         this.IMAGES = {};
+
+        this.socket = this.props.socket;
+        this.state = this.props.state;
+
+        this.studentsData = [];
+
+        this.POSITIONS = [
+            [0, 0],
+            [150, 0],
+            [300, 0],
+            [450, 0],
+            [0, 150],
+            [150, 150],
+            [300, 150],
+            [450, 150],
+        ];
     }
+
+    componentDidMount() {
+        let _this = this;
+        this.socket.on("students_update", (data) => {
+            // Set the students data with callback
+            this.setState(
+                {
+                    studentsData: data,
+                },
+                () => {
+                    // Update the characters
+                    _this.setupCharacters(_this.p5);
+                }
+            );
+        });
+    }
+
+    componentWillUnmount() {
+        this.socket.off("students_update");
+    }
+
+    setupCharacters = (p5) => {
+        let _this = this;
+        let characters = [];
+        for (let i = 0; i < _this.state.studentsData.length; i++) {
+            let student = _this.state.studentsData[i];
+            let character = new Student(
+                { sketch: p5, IMAGES: _this.IMAGES },
+                _this.POSITIONS[i][0],
+                _this.POSITIONS[i][1],
+                student.data.user
+            );
+            characters.push(character);
+        }
+
+        this.characters = characters;
+    };
 
     preload = (p5) => {
         this.IMAGES.character_idle = p5.loadImage(character_idle);
@@ -21,74 +77,13 @@ class StudentsP5 extends React.Component {
     };
 
     setup = (p5, canvasParentRef) => {
+        this.p5 = p5;
+
         p5.createCanvas(StudentsCanvasWidth, StudentsCanvasHeight).parent(
             canvasParentRef
         );
 
         p5.frameRate(60);
-
-        // Row 1
-        let student1 = new Student(
-            { sketch: p5, IMAGES: this.IMAGES },
-            0,
-            0,
-            "Student 1"
-        );
-        let student2 = new Student(
-            { sketch: p5, IMAGES: this.IMAGES },
-            150,
-            0,
-            "Student 2"
-        );
-        let student3 = new Student(
-            { sketch: p5, IMAGES: this.IMAGES },
-            300,
-            0,
-            "Student 3"
-        );
-        let student4 = new Student(
-            { sketch: p5, IMAGES: this.IMAGES },
-            450,
-            0,
-            "Student 4"
-        );
-
-        // Row 2
-        let student5 = new Student(
-            { sketch: p5, IMAGES: this.IMAGES },
-            0,
-            150,
-            "Student 5"
-        );
-        let student6 = new Student(
-            { sketch: p5, IMAGES: this.IMAGES },
-            150,
-            150,
-            "Student 6"
-        );
-        let student7 = new Student(
-            { sketch: p5, IMAGES: this.IMAGES },
-            300,
-            150,
-            "Student 7"
-        );
-        let student8 = new Student(
-            { sketch: p5, IMAGES: this.IMAGES },
-            450,
-            150,
-            "Student 8"
-        );
-
-        this.characters.push(student1);
-        this.characters.push(student2);
-        this.characters.push(student3);
-        this.characters.push(student4);
-        this.characters.push(student5);
-        this.characters.push(student6);
-        this.characters.push(student7);
-        this.characters.push(student8);
-
-        this.characters[0].raiseArm();
     };
 
     draw = (p5) => {

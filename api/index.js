@@ -7,6 +7,7 @@ const {
     join_classroom,
     create_classroom,
     draw_whiteboard,
+    update_students,
 } = require("./controllers/classroom.controllers");
 const {
     createClassroomValidator,
@@ -45,6 +46,17 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         console.log("Disconnected: ", socket.id);
+
+        // Get all rooms
+        const allRooms = io.sockets.adapter.rooms;
+        // Loop over the map
+        allRooms.forEach((value, key) => {
+            // Check if the room is empty
+            if (value.size !== 0) {
+                // Update the students
+                update_students(io, key);
+            }
+        });
     });
 
     socket.on("join_classroom", (data) => {
@@ -52,6 +64,7 @@ io.on("connection", (socket) => {
         if (error) {
             socket.emit("Error", error.details[0].message);
         } else {
+            socket.data.user = data.username;
             join_classroom(io, socket, data);
         }
     });

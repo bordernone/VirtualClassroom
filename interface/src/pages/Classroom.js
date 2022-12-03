@@ -1,5 +1,10 @@
 import React, { useEffect } from "react";
-import { useLocation, useOutletContext, useParams } from "react-router-dom";
+import {
+    useLocation,
+    useOutletContext,
+    useSearchParams,
+    useParams,
+} from "react-router-dom";
 import StudentsP5, {
     StudentsCanvasHeight,
     StudentsCanvasWidth,
@@ -8,16 +13,44 @@ import WhiteboardP5, {
     WhiteboardCanvasHeight,
     WhiteboardCanvasWidth,
 } from "../p5/Whiteboard/p5";
+import { Buffer } from "buffer";
 
 function Classroom() {
     const [socket] = useOutletContext();
     const { state } = useLocation();
 
+    const [searchParams, setSearchParams] = useSearchParams();
+    const { classroomId } = useParams();
+
+    const [data, setData] = React.useState(state);
+
     useEffect(() => {
-        if (state) {
-            console.log(state);
+        if (!state) {
+            let joinPassword = searchParams.get("joinPassword");
+            // Buffer decode
+            joinPassword = Buffer.from(joinPassword, "base64").toString(
+                "ascii"
+            );
+
+            let username = prompt("Enter your name");
+
+            socket.emit("join_classroom", {
+                username,
+                classroomId,
+                joinPassword,
+            });
         }
-    }, [state]);
+    }, [searchParams]);
+
+    useEffect(() => {
+        socket.on("join_classroom", (data) => {
+            setData(data);
+        });
+
+        return () => {
+            socket.off("join_classroom");
+        };
+    }, []);
 
     return (
         <div className="row pt-5 pb-5">
@@ -29,7 +62,7 @@ function Classroom() {
                     boxSizing: "content-box",
                 }}
             >
-                <StudentsP5 socket={socket} state={state}/>
+                {data && <StudentsP5 socket={socket} state={data} />}
             </div>
 
             <div
@@ -40,7 +73,7 @@ function Classroom() {
                     boxSizing: "content-box",
                 }}
             >
-                <WhiteboardP5 socket={socket} state={state} />
+                {data && <WhiteboardP5 socket={socket} state={data} />}
             </div>
         </div>
     );

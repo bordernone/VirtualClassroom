@@ -15,6 +15,7 @@ const join_classroom = (
     })
         .then((classroom) => {
             if (classroom) {
+                socket.data.isHost = true;
                 socket.join(classroom.id);
                 socket.emit("join_classroom", {
                     classroomId: classroom.id,
@@ -22,6 +23,9 @@ const join_classroom = (
                     username: username,
                     joinPassword: joinPassword,
                 });
+
+                // Update the students
+                update_students(io, classroom.id);
             } else {
                 // If the user is a student
                 Classroom.findOne({
@@ -39,6 +43,7 @@ const join_classroom = (
                                 "Classroom is full or hasn't started"
                             );
                         } else {
+                            socket.data.isHost = false;
                             socket.join(classroom.id);
                             socket.emit("join_classroom", {
                                 classroomId: classroom.id,
@@ -46,6 +51,9 @@ const join_classroom = (
                                 username: username,
                                 joinPassword: joinPassword,
                             });
+
+                            // Update the students
+                            update_students(io, classroom.id);
                         }
                     } else {
                         socket.emit("Error", "Invalid Password");
@@ -153,9 +161,32 @@ const draw_whiteboard = (
     });
 };
 
+const update_students = (io, classroomId) => {
+    // Get all the students in the classroom
+    let students = io.sockets.adapter.rooms.get(classroomId);
+    students = Array.from(students);
+
+    const studentsSocket = students.map((student) => {
+        return io.sockets.sockets.get(student);
+    });
+    const studentSocketData = studentsSocket.map((student) => {
+        return { data: student.data, id: student.id };
+    });
+
+    // Exclude the host from the students
+    const studentsData = studentSocketData.filter(
+        (student) => student.data.isHost === false
+    );
+
+    console.log(classroomId, studentSocketData);
+
+    io.to(classroomId).emit("students_update", studentSocketData);
+};
+
 module.exports = {
     join_classroom,
     start_classroom,
     create_classroom,
     draw_whiteboard,
+    update_students,
 };
