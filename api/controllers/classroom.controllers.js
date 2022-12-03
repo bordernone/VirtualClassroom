@@ -18,6 +18,8 @@ const join_classroom = (
             socket.emit("join_classroom", {
                 classroomId: classroom.id,
                 host: true,
+                username: username,
+                joinPassword: joinPassword,
             });
         } else {
             // If the user is a student
@@ -40,6 +42,8 @@ const join_classroom = (
                         socket.emit("join_classroom", {
                             classroomId: classroom.id,
                             host: false,
+                            username: username,
+                            joinPassword: joinPassword,
                         });
                     }
                 } else {
@@ -50,7 +54,7 @@ const join_classroom = (
     });
 };
 
-const start_classroom = (io, socket, classroomId, hostPassword) => {
+const start_classroom = (_io, socket, classroomId, hostPassword) => {
     if (classroomId && hostPassword) {
         // Get the classroom
         Classroom.findOne({
@@ -82,7 +86,7 @@ const start_classroom = (io, socket, classroomId, hostPassword) => {
     }
 };
 
-const create_classroom = (io, socket, { hostName, hostPassword }) => {
+const create_classroom = (_io, socket, { hostName, hostPassword }) => {
     // Generate a random join password
     const joinPassword = Math.random().toString(36).substring(2, 15);
 
@@ -106,4 +110,48 @@ const create_classroom = (io, socket, { hostName, hostPassword }) => {
         });
 };
 
-module.exports = { join_classroom, start_classroom, create_classroom };
+const draw_whiteboard = (
+    _io,
+    socket,
+    {
+        classroomId,
+        mouseX,
+        mouseY,
+        pmouseX,
+        pmouseY,
+        color,
+        size,
+        hostName,
+        hostPassword,
+    }
+) => {
+    // Check if the user is the host
+    Classroom.findOne({
+        where: {
+            id: classroomId,
+            hostPassword: hostPassword,
+            hostName: hostName,
+        },
+    }).then((classroom) => {
+        if (classroom) {
+            // Emit the draw event to all the students
+            socket.to(classroomId).emit("draw_whiteboard", {
+                mouseX,
+                mouseY,
+                pmouseX,
+                pmouseY,
+                color,
+                size,
+            });
+        } else {
+            socket.emit("Error", "Invalid Host Password");
+        }
+    });
+};
+
+module.exports = {
+    join_classroom,
+    start_classroom,
+    create_classroom,
+    draw_whiteboard,
+};

@@ -1,30 +1,42 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
-import reportWebVitals from "./reportWebVitals";
+import { Provider } from "react-redux";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
+import { persistStore } from "redux-persist";
+import { PersistGate } from "redux-persist/integration/react";
+import App from "./App";
 import "./App.css";
-import "./css/Footer.css";
 import "./css/Classroom.css";
-import Homepage from "./pages/Homepage";
+import "./css/Footer.css";
+import "./index.css";
 import Classroom from "./pages/Classroom";
+import Homepage from "./pages/Homepage";
+import store from "./redux/store";
+import reportWebVitals from "./reportWebVitals";
+
+let persistor = persistStore(store);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <App />,
+        element: (
+            <Provider store={store}>
+                <PersistGate loading={null} persistor={persistor}>
+                    <App />
+                </PersistGate>
+            </Provider>
+        ),
         children: [
             {
                 path: "/",
                 element: <Homepage />,
             },
             {
-                path: "/classroom",
+                path: "/classroom/:classroomId",
                 element: <Classroom />,
             },
         ],

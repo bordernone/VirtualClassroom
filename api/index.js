@@ -5,12 +5,13 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const {
     join_classroom,
-    start_classroom,
     create_classroom,
+    draw_whiteboard,
 } = require("./controllers/classroom.controllers");
 const {
     createClassroomValidator,
     joinClassroomValidator,
+    drawWhiteboardValidator,
 } = require("./validators/classroom.validators");
 const { instrument } = require("@socket.io/admin-ui");
 const cors = require("cors");
@@ -62,6 +63,15 @@ io.on("connection", (socket) => {
             socket.emit("Error", error.details[0].message);
         } else {
             create_classroom(io, socket, data);
+        }
+    });
+
+    socket.on("draw_whiteboard", (data) => {
+        const { error } = drawWhiteboardValidator(data);
+        if (error) {
+            socket.emit("Error", error.details[0].message);
+        } else {
+            draw_whiteboard(io, socket, data);
         }
     });
 });

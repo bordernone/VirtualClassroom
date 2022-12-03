@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function Homepage() {
     const [socket] = useOutletContext();
+    const navigate = useNavigate();
 
     const [showSuccess, setShowSuccess] = React.useState(false);
     const [successText, setSuccessText] = React.useState("");
@@ -18,11 +20,14 @@ function Homepage() {
 
         socket.on("join_classroom", (data) => {
             console.log(data);
-            if (data.host) {
-                setSuccessText(data);
-                setShowSuccess(true);
-            }
-            toast.success("Joined classroom successfully");
+            toast.success("Joined classroom successfully. Redirecting...");
+
+            setTimeout(() => {
+                let url = `/classroom/${data.classroomId}`;
+                navigate(url, {
+                    state: data,
+                });
+            }, 2000);
         });
 
         return () => {

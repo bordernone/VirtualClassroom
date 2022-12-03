@@ -1,14 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useLocation, useOutletContext, useParams } from "react-router-dom";
 import StudentsP5, {
-    StudentsCanvasWidth,
     StudentsCanvasHeight,
+    StudentsCanvasWidth
 } from "../p5/Student/p5";
 import WhiteboardP5, {
     WhiteboardCanvasHeight,
-    WhiteboardCanvasWidth,
+    WhiteboardCanvasWidth
 } from "../p5/Whiteboard/p5";
 
 function Classroom() {
+    const [socket] = useOutletContext();
+    const { classroomId } = useParams();
+    const { state } = useLocation();
+
+    useEffect(() => {
+        if (state) {
+            console.log(state);
+        }
+    }, [state]);
+
     return (
         <div className="row pt-5 pb-5">
             <div
@@ -30,7 +41,7 @@ function Classroom() {
                     boxSizing: "content-box",
                 }}
             >
-                <WhiteboardP5 />
+                <WhiteboardP5 socket={socket} classroomId={classroomId} />
             </div>
         </div>
     );
