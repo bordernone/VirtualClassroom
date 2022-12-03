@@ -2,11 +2,11 @@ import React, { useEffect } from "react";
 import { useLocation, useOutletContext, useParams } from "react-router-dom";
 import StudentsP5, {
     StudentsCanvasHeight,
-    StudentsCanvasWidth
+    StudentsCanvasWidth,
 } from "../p5/Student/p5";
 import WhiteboardP5, {
     WhiteboardCanvasHeight,
-    WhiteboardCanvasWidth
+    WhiteboardCanvasWidth,
 } from "../p5/Whiteboard/p5";
 
 function Classroom() {
@@ -41,7 +41,7 @@ function Classroom() {
                     boxSizing: "content-box",
                 }}
             >
-                <WhiteboardP5 socket={socket} classroomId={classroomId} />
+                <WhiteboardP5 socket={socket} state={state} />
             </div>
         </div>
     );

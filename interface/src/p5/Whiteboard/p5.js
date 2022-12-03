@@ -9,6 +9,7 @@ class WhiteboardP5 extends React.Component {
         super(props);
 
         this.socket = props.socket;
+        this.state = props.state;
 
         this.strokeWeight = 4;
         this.color = "black";
@@ -31,9 +32,7 @@ class WhiteboardP5 extends React.Component {
 
     draw = (p5) => {
         // Draw on mouse press
-        if (p5.mouseIsPressed) {
-            p5.stroke(this.color);
-            p5.strokeWeight(this.strokeWeight);
+        if (this.state.host && p5.mouseIsPressed && p5.mouseX > 0 && p5.mouseX < WhiteboardCanvasWidth && p5.mouseY > 0 && p5.mouseY < WhiteboardCanvasHeight) {
             this.socket.emit("draw_whiteboard", {
                 mouseX: p5.mouseX,
                 mouseY: p5.mouseY,
@@ -41,8 +40,9 @@ class WhiteboardP5 extends React.Component {
                 pmouseY: p5.pmouseY,
                 color: this.color,
                 size: this.strokeWeight,
-                hostName: "Bishnu",
-                hostPassword: "1234",
+                hostName: this.state.username,
+                hostPassword: this.state.joinPassword,
+                classroomId: this.state.classroomId,
             });
         }
     };

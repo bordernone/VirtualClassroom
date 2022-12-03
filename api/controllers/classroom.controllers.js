@@ -111,7 +111,7 @@ const create_classroom = (_io, socket, { hostName, hostPassword }) => {
 };
 
 const draw_whiteboard = (
-    _io,
+    io,
     socket,
     {
         classroomId,
@@ -135,7 +135,7 @@ const draw_whiteboard = (
     }).then((classroom) => {
         if (classroom) {
             // Emit the draw event to all the students
-            socket.to(classroomId).emit("draw_whiteboard", {
+            io.to(classroomId).emit("draw_whiteboard", {
                 mouseX,
                 mouseY,
                 pmouseX,
