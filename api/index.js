@@ -18,6 +18,7 @@ const {
 const { instrument } = require("@socket.io/admin-ui");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const path = require("path");
 
 const app = express();
 app.use(express.json());
@@ -104,3 +105,5 @@ const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+app.use(express.static(path.join(__dirname, "public")));
