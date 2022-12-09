@@ -4,6 +4,8 @@ import { CopyBlock, dracula } from "react-code-blocks";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import "../css/Homepage.css";
+
 function Homepage() {
     const [socket] = useOutletContext();
     const navigate = useNavigate();
@@ -13,9 +15,16 @@ function Homepage() {
 
     const [showJoinForm, setShowJoinForm] = React.useState(false);
 
+    const [shareLinkText, setShareLinkText] = React.useState("Copy Link");
+
+    const [username, setUsername] = React.useState("");
+    const [joinPassword, setJoinPassword] = React.useState("");
+    const [classroomId, setClassroomId] = React.useState("");
+
     useEffect(() => {
         socket.on("create_classroom", (data) => {
             console.log(data);
+            setClassroomId(data.classroomId);
             setSuccessText(data);
             setShowSuccess(true);
             toast.success("Classroom created successfully");
@@ -43,6 +52,9 @@ function Homepage() {
         let hostName = prompt("Enter your name");
         let hostPassword = prompt("Enter a master password");
 
+        setUsername(hostName);
+        setJoinPassword(hostPassword);
+
         socket.emit("create_classroom", {
             hostName,
             hostPassword,
@@ -64,6 +76,15 @@ function Homepage() {
         let joinPassword = e.target.joinPassword.value;
 
         joinClassroom(username, classroomId, joinPassword);
+    };
+
+    const getShareableLink = () => {
+        return (
+            `${window.location.origin}/classroom/` +
+            successText.classroomId +
+            "?joinPassword=" +
+            Buffer.from(successText.joinPassword).toString("base64")
+        );
     };
 
     return (
@@ -91,10 +112,70 @@ function Homepage() {
                         className="btn btn-primary"
                         onClick={() => setShowJoinForm(!showJoinForm)}
                     >
-                        Start Classroom
+                        Join Classroom
                     </a>
                 </div>
+            </div>
 
+            <div>
+                {successText.classroomId && (
+                    <div className="row justify-content-center p-5">
+                        <div className="justify-content-center d-flex">
+                            <div className="col-2">
+                                <button
+                                    type="button"
+                                    className="btn btn-labeled btn-dark"
+                                    onClick={() => {
+                                        joinClassroom(
+                                            username,
+                                            classroomId,
+                                            joinPassword
+                                        );
+                                    }}
+                                >
+                                    <span className="btn-label">
+                                        <i className="fa fa-chevron-right" />
+                                    </span>
+                                    Start Now
+                                </button>
+                            </div>
+                            <div className="col-2">
+                                <button
+                                    type="button"
+                                    className="btn btn-labeled  btn-outline-secondary"
+                                    onClick={() => {
+                                        setShareLinkText("Copied!");
+                                        navigator.clipboard.writeText(
+                                            getShareableLink()
+                                        );
+                                        setTimeout(() => {
+                                            setShareLinkText("Copy Link");
+                                        }, 2000);
+                                    }}
+                                >
+                                    <span className="btn-label">
+                                        <i className="fa fa-copy" />
+                                    </span>
+                                    {shareLinkText}
+                                </button>
+                            </div>
+                        </div>
+                        <div className="justify-content-center d-flex text-center">
+                            <div>
+                                Join as participant:{" "}
+                                <small>
+                                    (share this link with participants)
+                                </small>
+                                <CopyBlock
+                                    text={getShareableLink()}
+                                    codeBlock
+                                    theme={dracula}
+                                    showLineNumbers={false}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div>
                     <div
                         className={
@@ -104,26 +185,6 @@ function Homepage() {
                         role="alert"
                     >
                         {<pre>{JSON.stringify(successText, null, 2)}</pre>}
-
-                        {successText.classroomId && (
-                            <>
-                                Join as participant: <small>(share this link with participants)</small>
-                                <CopyBlock
-                                    language="go"
-                                    text={
-                                        `${window.location.origin}/classroom/` +
-                                        successText.classroomId +
-                                        "?joinPassword=" +
-                                        Buffer.from(
-                                            successText.joinPassword
-                                        ).toString("base64")
-                                    }
-                                    codeBlock
-                                    theme={dracula}
-                                    showLineNumbers={false}
-                                />
-                            </>
-                        )}
                     </div>
                 </div>
 

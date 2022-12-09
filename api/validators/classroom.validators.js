@@ -46,10 +46,20 @@ const updateArmStatusValidator = (payload) => {
     return schema.validate(payload);
 };
 
+const clearWhiteboardValidator = (payload) => {
+    const schema = Joi.object({
+        classroomId: Joi.string().required(),
+        hostName: Joi.string().required(),
+        hostPassword: Joi.string().required(),
+    });
+    return schema.validate(payload);
+};
+
 module.exports = {
     createClassroomValidator,
     joinClassroomValidator,
     drawWhiteboardValidator,
     studentsUpdateValidator,
     updateArmStatusValidator,
+    clearWhiteboardValidator,
 };

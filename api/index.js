@@ -9,6 +9,7 @@ const {
     draw_whiteboard,
     update_students,
     update_students_all,
+    clear_whiteboard,
 } = require("./controllers/classroom.controllers");
 const {
     createClassroomValidator,
@@ -16,6 +17,7 @@ const {
     drawWhiteboardValidator,
     studentsUpdateValidator,
     updateArmStatusValidator,
+    clearWhiteboardValidator,
 } = require("./validators/classroom.validators");
 const { instrument } = require("@socket.io/admin-ui");
 const cors = require("cors");
@@ -98,6 +100,15 @@ io.on("connection", (socket) => {
         } else {
             socket.data.armRaised = data.armRaised;
             update_students_all(io);
+        }
+    });
+
+    socket.on("clear_whiteboard", (data) => {
+        const { error } = clearWhiteboardValidator(data);
+        if (error) {
+            socket.emit("Error", error.details[0].message);
+        } else {
+            clear_whiteboard(io, socket, data);
         }
     });
 });

@@ -198,6 +198,32 @@ const update_students_all = (io) => {
     });
 };
 
+const clear_whiteboard = (
+    io,
+    socket,
+    { classroomId, hostName, hostPassword }
+) => {
+    // Check if the user is the host
+    Classroom.findOne({
+        where: {
+            id: classroomId,
+            hostPassword: hostPassword,
+            hostName: hostName,
+        },
+    })
+        .then((classroom) => {
+            if (classroom) {
+                // Emit the clear event to all the students
+                io.to(classroomId).emit("clear_whiteboard");
+            } else {
+                socket.emit("Error", "Invalid Host Password");
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
 module.exports = {
     join_classroom,
     start_classroom,
@@ -205,4 +231,5 @@ module.exports = {
     draw_whiteboard,
     update_students,
     update_students_all,
+    clear_whiteboard,
 };

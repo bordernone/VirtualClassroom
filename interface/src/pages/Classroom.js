@@ -1,9 +1,11 @@
+import { Buffer } from "buffer";
 import React, { useEffect } from "react";
+import { CopyBlock, dracula } from "react-code-blocks";
 import {
     useLocation,
     useOutletContext,
-    useSearchParams,
     useParams,
+    useSearchParams,
 } from "react-router-dom";
 import StudentsP5, {
     StudentsCanvasHeight,
@@ -13,7 +15,6 @@ import WhiteboardP5, {
     WhiteboardCanvasHeight,
     WhiteboardCanvasWidth,
 } from "../p5/Whiteboard/p5";
-import { Buffer } from "buffer";
 
 function Classroom() {
     const [socket] = useOutletContext();
@@ -52,6 +53,14 @@ function Classroom() {
         };
     }, []);
 
+    const getShareableLink = () => {
+        let joinPassword = data.joinPassword;
+        // Buffer encode
+        joinPassword = Buffer.from(joinPassword).toString("base64");
+
+        return `${window.location.origin}/classroom/${data.classroomId}?joinPassword=${joinPassword}`;
+    };
+
     return (
         <div className="row pt-5 pb-5">
             <div
@@ -66,7 +75,7 @@ function Classroom() {
             </div>
 
             <div
-                className="col-sm-6 border-gradient border-gradient-purple"
+                className="col-sm-6 border-gradient border-gradient-purple p-0"
                 style={{
                     width: `${WhiteboardCanvasWidth}px`,
                     height: `${WhiteboardCanvasHeight}px`,
@@ -74,6 +83,16 @@ function Classroom() {
                 }}
             >
                 {data && <WhiteboardP5 socket={socket} state={data} />}
+
+                <div className="code-block-wrapper mt-1">
+                    <label>Share Link:</label>
+                    <CopyBlock
+                        text={getShareableLink()}
+                        codeBlock
+                        theme={dracula}
+                        showLineNumbers={false}
+                    />
+                </div>
             </div>
         </div>
     );
