@@ -39,9 +39,17 @@ const studentsUpdateValidator = (payload) => {
     return schema.validate(payload);
 };
 
+const updateArmStatusValidator = (payload) => {
+    const schema = Joi.object({
+        armRaised: Joi.boolean().required(),
+    });
+    return schema.validate(payload);
+};
+
 module.exports = {
     createClassroomValidator,
     joinClassroomValidator,
     drawWhiteboardValidator,
     studentsUpdateValidator,
+    updateArmStatusValidator,
 };

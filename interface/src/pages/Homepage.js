@@ -111,7 +111,7 @@ function Homepage() {
                                 <CopyBlock
                                     language="go"
                                     text={
-                                        "http://localhost:3000/classroom/" +
+                                        `${window.location.origin}/classroom/` +
                                         successText.classroomId +
                                         "?joinPassword=" +
                                         Buffer.from(

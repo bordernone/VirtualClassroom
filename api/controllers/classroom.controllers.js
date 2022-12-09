@@ -185,10 +185,24 @@ const update_students = (io, classroomId) => {
     }
 };
 
+const update_students_all = (io) => {
+    // Get all rooms
+    const allRooms = io.sockets.adapter.rooms;
+    // Loop over the map
+    allRooms.forEach((value, key) => {
+        // Check if the room is empty
+        if (value.size !== 0) {
+            // Update the students
+            update_students(io, key);
+        }
+    });
+};
+
 module.exports = {
     join_classroom,
     start_classroom,
     create_classroom,
     draw_whiteboard,
     update_students,
+    update_students_all,
 };

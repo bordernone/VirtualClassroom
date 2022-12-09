@@ -8,12 +8,14 @@ const {
     create_classroom,
     draw_whiteboard,
     update_students,
+    update_students_all,
 } = require("./controllers/classroom.controllers");
 const {
     createClassroomValidator,
     joinClassroomValidator,
     drawWhiteboardValidator,
     studentsUpdateValidator,
+    updateArmStatusValidator,
 } = require("./validators/classroom.validators");
 const { instrument } = require("@socket.io/admin-ui");
 const cors = require("cors");
@@ -48,17 +50,7 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         console.log("Disconnected: ", socket.id);
-
-        // Get all rooms
-        const allRooms = io.sockets.adapter.rooms;
-        // Loop over the map
-        allRooms.forEach((value, key) => {
-            // Check if the room is empty
-            if (value.size !== 0) {
-                // Update the students
-                update_students(io, key);
-            }
-        });
+        update_students_all(io);
     });
 
     socket.on("join_classroom", (data) => {
@@ -96,6 +88,16 @@ io.on("connection", (socket) => {
             socket.emit("Error", error.details[0].message);
         } else {
             update_students(io, data.classroomId);
+        }
+    });
+
+    socket.on("update_arm_status", (data) => {
+        const { error } = updateArmStatusValidator(data);
+        if (error) {
+            socket.emit("Error", error.details[0].message);
+        } else {
+            socket.data.armRaised = data.armRaised;
+            update_students_all(io);
         }
     });
 });
