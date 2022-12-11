@@ -26,6 +26,8 @@ class StudentsP5 extends React.Component {
         this.IMAGES = {};
         this.characterArmRaised = false;
 
+        this.ping = null;
+
         this.socket = this.props.socket;
         this.state = { ...this.props.state, loading: true };
 
@@ -67,7 +69,7 @@ class StudentsP5 extends React.Component {
     componentWillUnmount() {
         this.poseNet.removeListener("pose", this.onPoseNet);
         this.socket.off("students_update");
-        clearInterval(this.listener);
+        clearInterval(this.ping);
     }
 
     setupPoseNet = (p5) => {
@@ -94,6 +96,13 @@ class StudentsP5 extends React.Component {
             this.socket.emit("students_update", {
                 classroomId: this.state.classroomId,
             });
+
+            let _this = this;
+            this.ping = setInterval(() => {
+                _this.socket.emit("students_update", {
+                    classroomId: _this.state.classroomId,
+                });
+            }, 1000);
 
             this.setState({ loading: false });
         });

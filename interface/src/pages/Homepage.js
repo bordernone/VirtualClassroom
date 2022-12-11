@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { CopyBlock, dracula } from "react-code-blocks";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { toast } from "react-toastify";
+import Accordion from "react-bootstrap/Accordion";
 
 import "../css/Homepage.css";
 
@@ -109,7 +110,7 @@ function Homepage() {
                 <div className="col-2">
                     <a
                         href="#!"
-                        className="btn btn-primary"
+                        className="btn btn-secondary"
                         onClick={() => setShowJoinForm(!showJoinForm)}
                     >
                         Join Classroom
@@ -177,23 +178,35 @@ function Homepage() {
                     </div>
                 )}
                 <div>
-                    <div
-                        className={
-                            "mt-4 alert alert-success " +
-                            (!showSuccess ? "d-none" : "")
-                        }
-                        role="alert"
-                    >
-                        {<pre>{JSON.stringify(successText, null, 2)}</pre>}
-                    </div>
+                    <Accordion>
+                        <Accordion.Item eventKey="0">
+                            <Accordion.Header>Show Details</Accordion.Header>
+                            <Accordion.Body>
+                                <div
+                                    className={
+                                        "mt-4 alert alert-success " +
+                                        (!showSuccess ? "d-none" : "")
+                                    }
+                                    role="alert"
+                                >
+                                    {
+                                        <pre>
+                                            {JSON.stringify(
+                                                successText,
+                                                null,
+                                                2
+                                            )}
+                                        </pre>
+                                    }
+                                </div>
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    </Accordion>
                 </div>
 
-                <div className="col-sm-6">
+                <div className="row justify-content-center">
                     <div
-                        className={
-                            "container px-5 my-5 " +
-                            (showJoinForm ? "" : "d-none")
-                        }
+                        className={"col-sm-6 " + (showJoinForm ? "" : "d-none")}
                     >
                         <form id="contactForm" onSubmit={onFormSubmit}>
                             <div className="form-floating mb-3">
@@ -234,7 +247,7 @@ function Homepage() {
                             </div>
                             <div className="d-grid">
                                 <button
-                                    className="btn btn-primary btn-lg"
+                                    className="btn btn-success btn-lg"
                                     id="submitButton"
                                     type="submit"
                                 >

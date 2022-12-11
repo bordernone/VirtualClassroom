@@ -110,19 +110,25 @@ class WhiteboardP5 extends React.Component {
         p5.text(this.label, this.toolbarX + 10, this.toolbarY + 30);
 
         // Draw the clear button
-        p5.stroke(0);
-        p5.strokeWeight(1);
-        p5.fill(255);
-        p5.rect(
-            this.clearBtnX,
-            this.clearBtnY,
-            this.clearBtnWidth,
-            this.clearBtnHeight
-        );
+        if (this.state.host) {
+            p5.stroke(0);
+            p5.strokeWeight(1);
+            p5.fill(255);
+            p5.rect(
+                this.clearBtnX,
+                this.clearBtnY,
+                this.clearBtnWidth,
+                this.clearBtnHeight
+            );
 
-        p5.fill(0);
-        p5.textSize(20);
-        p5.text(this.clearBtnLabel, this.clearBtnX + 10, this.clearBtnY + 20);
+            p5.fill(0);
+            p5.textSize(20);
+            p5.text(
+                this.clearBtnLabel,
+                this.clearBtnX + 10,
+                this.clearBtnY + 20
+            );
+        }
     };
 
     clearWhiteboard = (p5) => {

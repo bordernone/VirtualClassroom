@@ -1,6 +1,10 @@
 import React from "react";
 
 function Footer() {
+    const getSiteUrl = () => {
+        return window.location.origin;
+    };
+
     return (
         <div>
             <footer
@@ -18,16 +22,45 @@ function Footer() {
                     </div>
                     <div className="row">
                         <div className="col text-center">
-                            <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A//somecoolurl.com" className="fa fa-facebook">
+                            <a
+                                href={
+                                    "https://www.facebook.com/sharer/sharer.php?u=" +
+                                    getSiteUrl()
+                                }
+                                className="fa fa-facebook"
+                                target={"_blank"}
+                                rel="noreferrer"
+                            >
                                 <span></span>
                             </a>
-                            <a href="https://twitter.com/intent/tweet?text=http%3A//somecoolurl.com" className="fa fa-twitter">
+                            <a
+                                href={
+                                    "https://twitter.com/intent/tweet?text=" +
+                                    getSiteUrl()
+                                }
+                                className="fa fa-twitter"
+                                target={"_blank"}
+                                rel="noreferrer"
+                            >
                                 <span></span>
                             </a>
-                            <a href="https://pinterest.com/pin/create/button/?url=http://somecoolurl.com&media=&description=" className="fa fa-pinterest">
+                            <a
+                                href={`https://pinterest.com/pin/create/button/?url=${getSiteUrl()}&media=&description=`}
+                                className="fa fa-pinterest"
+                                target={"_blank"}
+                                rel="noreferrer"
+                            >
                                 <span></span>
                             </a>
-                            <a href="https://www.linkedin.com/shareArticle?mini=true&url=http://somecoolurl.com" className="fa fa-linkedin">
+                            <a
+                                href={
+                                    "https://www.linkedin.com/shareArticle?mini=true&url=" +
+                                    getSiteUrl()
+                                }
+                                target={"_blank"}
+                                rel="noreferrer"
+                                className="fa fa-linkedin"
+                            >
                                 <span></span>
                             </a>
                         </div>
