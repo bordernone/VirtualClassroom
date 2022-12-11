@@ -177,16 +177,13 @@ function Homepage() {
                         </div>
                     </div>
                 )}
-                <div>
+                <div className={!showSuccess ? "d-none" : ""}>
                     <Accordion>
                         <Accordion.Item eventKey="0">
                             <Accordion.Header>Show Details</Accordion.Header>
                             <Accordion.Body>
                                 <div
-                                    className={
-                                        "mt-4 alert alert-success " +
-                                        (!showSuccess ? "d-none" : "")
-                                    }
+                                    className={"mt-4 alert alert-success "}
                                     role="alert"
                                 >
                                     {

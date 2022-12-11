@@ -16,7 +16,7 @@ const {
     joinClassroomValidator,
     drawWhiteboardValidator,
     studentsUpdateValidator,
-    updateArmStatusValidator,
+    updateStudentStatus,
     clearWhiteboardValidator,
 } = require("./validators/classroom.validators");
 const { instrument } = require("@socket.io/admin-ui");
@@ -69,6 +69,8 @@ io.on("connection", (socket) => {
             socket.emit("Error", error.details[0].message);
         } else {
             socket.data.user = data.username;
+            socket.data.armRaised = false;
+            socket.data.isPresent = false;
             join_classroom(io, socket, data);
         }
     });
@@ -101,12 +103,13 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("update_arm_status", (data) => {
-        const { error } = updateArmStatusValidator(data);
+    socket.on("update_status", (data) => {
+        const { error } = updateStudentStatus(data);
         if (error) {
             socket.emit("Error", error.details[0].message);
         } else {
             socket.data.armRaised = data.armRaised;
+            socket.data.isPresent = data.isPresent;
             update_students_all(io);
         }
     });

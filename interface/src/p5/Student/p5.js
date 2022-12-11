@@ -1,16 +1,18 @@
-import React from "react";
-import Sketch from "react-p5";
 import * as ml5 from "ml5";
+import React from "react";
 import LoadingOverlay from "react-loading-overlay";
+import Sketch from "react-p5";
 
-import Student from "./Student";
-import character_idle from "../../assets/characters/character_idle.png";
 import character_arm_raised from "../../assets/characters/character_arm_raised.png";
+import character_idle from "../../assets/characters/character_idle.png";
+import Student from "./Student";
 
 LoadingOverlay.propTypes = undefined;
 
 export const StudentsCanvasHeight = 400;
 export const StudentsCanvasWidth = 600;
+
+export const MIN_Confidence = 0.5;
 
 class StudentsP5 extends React.Component {
     constructor(props) {
@@ -21,9 +23,9 @@ class StudentsP5 extends React.Component {
         this.videoRef = React.createRef();
         this.poseNet = null;
         this.posesHistory = [];
-
         this.characters = [];
         this.IMAGES = {};
+        this.characterPresent = false;
         this.characterArmRaised = false;
 
         this.ping = null;
@@ -48,7 +50,7 @@ class StudentsP5 extends React.Component {
     componentDidMount() {
         let _this = this;
         this.socket.on("students_update", (data) => {
-            console.log("students_update", data);
+            // console.log("students_update", data);
             // Set the students data with callback
             this.setState(
                 {
@@ -64,6 +66,10 @@ class StudentsP5 extends React.Component {
         this.setupPoseNet(this.p5);
 
         window.addEventListener("arm_status_change", this.onArmStatusChange);
+        window.addEventListener(
+            "presence_status_change",
+            this.onPresenceStatusChange
+        );
     }
 
     componentWillUnmount() {
@@ -115,12 +121,23 @@ class StudentsP5 extends React.Component {
             this.posesHistory.push(poses[0].pose);
         }
 
+        if (this.posesHistory.length > 10) {
+            this.posesHistory.shift();
+        }
         poses = this.posesHistory;
 
+        // if not host
+        if (!this.state.isHost) {
+            this.detectArmStatusChange(poses);
+        }
+        this.detectPresence(poses);
+    };
+
+    detectArmStatusChange = (poses) => {
         // last 5 poses
         const n = 5;
         if (poses.length >= n) {
-            // take the last n
+            // Get the last n poses
             poses = poses.slice(poses.length - n, poses.length);
 
             let raised = true;
@@ -165,6 +182,51 @@ class StudentsP5 extends React.Component {
         }
     };
 
+    detectPresence = (poses) => {
+        let n = 5;
+        if (poses.length > n) {
+            // Get the last n poses
+            poses = poses.slice(poses.length - n, poses.length);
+            // Check if nose or shoulders are visible
+            let characterPresent = true;
+            // console.log(poses[0]);
+            for (const pose of poses) {
+                if (
+                    pose.leftShoulder.confidence < MIN_Confidence &&
+                    pose.rightShoulder.confidence < MIN_Confidence
+                ) {
+                    characterPresent = false;
+                    break;
+                }
+            }
+
+            if (characterPresent && !this.characterPresent) {
+                this.characterPresent = true;
+                // Dispatch the arm raised event
+                const event = new CustomEvent("presence_status_change", {
+                    detail: {
+                        isPresent: true,
+                    },
+                });
+                window.dispatchEvent(event);
+                return;
+            }
+
+            if (!characterPresent && this.characterPresent) {
+                this.characterPresent = false;
+                // Dispatch the arm raised event
+                const event = new CustomEvent("presence_status_change", {
+                    detail: {
+                        isPresent: false,
+                    },
+                });
+                window.dispatchEvent(event);
+                return;
+            }
+        }
+        return false;
+    };
+
     isArmRaised = (pose) => {
         return this.leftArmRaised(pose) || this.rightArmRaised(pose);
     };
@@ -173,7 +235,10 @@ class StudentsP5 extends React.Component {
         let leftWrist = pose.leftWrist;
         let leftShoulder = pose.leftShoulder;
 
-        if (leftWrist.confidence > 0.2 && leftShoulder.confidence > 0.2) {
+        if (
+            leftWrist.confidence > MIN_Confidence &&
+            leftShoulder.confidence > MIN_Confidence
+        ) {
             let leftWristY = leftWrist.y;
             let leftShoulderY = leftShoulder.y;
 
@@ -189,7 +254,10 @@ class StudentsP5 extends React.Component {
         let rightWrist = pose.rightWrist;
         let rightShoulder = pose.rightShoulder;
 
-        if (rightWrist.confidence > 0.2 && rightShoulder.confidence > 0.2) {
+        if (
+            rightWrist.confidence > MIN_Confidence &&
+            rightShoulder.confidence > MIN_Confidence
+        ) {
             let rightWristY = rightWrist.y;
             let rightShoulderY = rightShoulder.y;
 
@@ -202,26 +270,37 @@ class StudentsP5 extends React.Component {
     };
 
     isLookingAtScreen = (pose) => {
-        let leftEye = pose.leftEye;
-        let rightEye = pose.rightEye;
+        return true; // TODO: Add in future versions
+        // let leftEye = pose.leftEye;
+        // let rightEye = pose.rightEye;
 
-        if (leftEye.confidence > 0.2 && rightEye.confidence > 0.2) {
-            let leftEyeX = leftEye.x;
-            let rightEyeX = rightEye.x;
+        // if (leftEye.confidence > MIN_Confidence && rightEye.confidence > MIN_Confidence) {
+        //     let leftEyeX = leftEye.x;
+        //     let rightEyeX = rightEye.x;
 
-            if (leftEyeX > rightEyeX) {
-                return true;
-            }
-        }
+        //     if (leftEyeX > rightEyeX) {
+        //         return true;
+        //     }
+        // }
 
-        return false;
+        // return false;
     };
 
     onArmStatusChange = (e) => {
         let isRaised = e.detail.isRaised;
         console.log("isRaised:", isRaised);
-        this.socket.emit("update_arm_status", {
+        this.socket.emit("update_status", {
             armRaised: isRaised,
+            isPresent: this.characterPresent,
+        });
+    };
+
+    onPresenceStatusChange = (e) => {
+        let isPresent = e.detail.isPresent;
+        console.log("isPresent:", isPresent);
+        this.socket.emit("update_status", {
+            isPresent: isPresent,
+            armRaised: this.characterArmRaised,
         });
     };
 
@@ -230,6 +309,7 @@ class StudentsP5 extends React.Component {
         let characters = [];
         for (let i = 0; i < _this.state.studentsData.length; i++) {
             let student = _this.state.studentsData[i];
+            if (student.data.isPresent === false) continue;
             let character = new Student(
                 { sketch: p5, IMAGES: _this.IMAGES },
                 _this.POSITIONS[i][0],
