@@ -39,9 +39,10 @@ const studentsUpdateValidator = (payload) => {
     return schema.validate(payload);
 };
 
-const updateArmStatusValidator = (payload) => {
+const updateStudentStatus = (payload) => {
     const schema = Joi.object({
         armRaised: Joi.boolean().required(),
+        isPresent: Joi.boolean().required(),
     });
     return schema.validate(payload);
 };
@@ -60,6 +61,6 @@ module.exports = {
     joinClassroomValidator,
     drawWhiteboardValidator,
     studentsUpdateValidator,
-    updateArmStatusValidator,
+    updateStudentStatus,
     clearWhiteboardValidator,
 };
