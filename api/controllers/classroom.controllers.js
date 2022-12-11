@@ -170,16 +170,16 @@ const update_students = (io, classroomId) => {
         const studentsSocket = students.map((student) => {
             return io.sockets.sockets.get(student);
         });
-        const studentSocketData = studentsSocket.map((student) => {
+        let studentSocketData = studentsSocket.map((student) => {
             return { data: student.data, id: student.id };
         });
 
-        // Exclude the host from the students
-        const studentsData = studentSocketData.filter(
-            (student) => student.data.isHost === false
-        );
+        // // Exclude the host from the students
+        // studentSocketData = studentSocketData.filter(
+        //     (student) => student.data.isHost === false
+        // );
 
-        io.to(classroomId).emit("students_update", studentsData);
+        io.to(classroomId).emit("students_update", studentSocketData);
     } catch (err) {
         console.log(err);
     }

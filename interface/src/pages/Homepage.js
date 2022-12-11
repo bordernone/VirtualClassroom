@@ -22,23 +22,28 @@ function Homepage() {
     const [joinPassword, setJoinPassword] = React.useState("");
     const [classroomId, setClassroomId] = React.useState("");
 
+    const [publicJoinPassword, setPublicJoinPassword] = React.useState(null);
+    const publicJoinPasswordRef = React.useRef(publicJoinPassword);
+
     useEffect(() => {
         socket.on("create_classroom", (data) => {
-            console.log(data);
+            console.log("create ", data);
             setClassroomId(data.classroomId);
             setSuccessText(data);
             setShowSuccess(true);
+            setPublicJoinPassword(data.joinPassword);
+            publicJoinPasswordRef.current = data.joinPassword;
             toast.success("Classroom created successfully");
         });
 
         socket.on("join_classroom", (data) => {
             console.log(data);
             toast.success("Joined classroom successfully. Redirecting...");
-
+            let publicJoinPassword_ = publicJoinPasswordRef.current;
             setTimeout(() => {
                 let url = `/classroom/${data.classroomId}`;
                 navigate(url, {
-                    state: data,
+                    state: { ...data, publicJoinPassword: publicJoinPassword_ },
                 });
             }, 2000);
         });

@@ -33,8 +33,6 @@ class StudentsP5 extends React.Component {
         this.socket = this.props.socket;
         this.state = { ...this.props.state, loading: true };
 
-        this.studentsData = [];
-
         this.POSITIONS = [
             [0, 0],
             [150, 0],
@@ -50,7 +48,7 @@ class StudentsP5 extends React.Component {
     componentDidMount() {
         let _this = this;
         this.socket.on("students_update", (data) => {
-            // console.log("students_update", data);
+            console.log("students_update", data);
             // Set the students data with callback
             this.setState(
                 {
@@ -309,6 +307,7 @@ class StudentsP5 extends React.Component {
         let characters = [];
         for (let i = 0; i < _this.state.studentsData.length; i++) {
             let student = _this.state.studentsData[i];
+            if (student.data.isHost) continue;
             if (student.data.isPresent === false) continue;
             let character = new Student(
                 { sketch: p5, IMAGES: _this.IMAGES },
@@ -342,7 +341,8 @@ class StudentsP5 extends React.Component {
 
     draw = (p5) => {
         p5.background(255);
-
+        // Fill black
+        p5.fill(0);
         this.characters.forEach((character) => {
             try {
                 character.draw();
@@ -350,6 +350,27 @@ class StudentsP5 extends React.Component {
                 // console.log(e);
             }
         });
+
+        this.drawHostPresentText(p5);
+    };
+
+    drawHostPresentText = (p5) => {
+        // Draw gray circle if host is not present
+        if (!this.isHostPresent()) {
+            p5.fill(200);
+            p5.circle(StudentsCanvasWidth - 10, 10, 10);
+        } else {
+            p5.fill(0, 255, 0);
+            p5.circle(StudentsCanvasWidth - 10, 10, 10);
+        }
+    };
+
+    isHostPresent = () => {
+        let host = this.state.studentsData?.find((student) => {
+            return student.data.isHost;
+        });
+
+        return !!host;
     };
 
     render() {
