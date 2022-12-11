@@ -10,7 +10,7 @@ import Student from "./Student";
 LoadingOverlay.propTypes = undefined;
 
 export const StudentsCanvasHeight = 400;
-export const StudentsCanvasWidth = 600;
+export const StudentsCanvasWidth = 500;
 
 export const MIN_Confidence = 0.5;
 

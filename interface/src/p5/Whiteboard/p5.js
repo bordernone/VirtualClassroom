@@ -2,7 +2,7 @@ import React from "react";
 import Sketch from "react-p5";
 
 export const WhiteboardCanvasHeight = 400;
-export const WhiteboardCanvasWidth = 600;
+export const WhiteboardCanvasWidth = 500;
 
 class WhiteboardP5 extends React.Component {
     constructor(props) {
