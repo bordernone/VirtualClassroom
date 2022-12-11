@@ -25,6 +25,14 @@ const bcrypt = require("bcrypt");
 const path = require("path");
 
 const app = express();
+
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "public")));
+    app.get("/*", function (req, res) {
+        return res.sendFile(path.join(__dirname, "public", "index.html"));
+    });
+}
+
 app.use(express.json());
 
 app.use(cors());
@@ -118,5 +126,3 @@ const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
-app.use(express.static(path.join(__dirname, "public")));

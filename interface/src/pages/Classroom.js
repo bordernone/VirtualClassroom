@@ -54,6 +54,7 @@ function Classroom() {
     }, []);
 
     const getShareableLink = () => {
+        if (!data) return "";
         let joinPassword = data.joinPassword;
         // Buffer encode
         joinPassword = Buffer.from(joinPassword).toString("base64");
