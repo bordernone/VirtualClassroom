@@ -10,7 +10,7 @@ import Student from "./Student";
 LoadingOverlay.propTypes = undefined;
 
 export const StudentsCanvasHeight = 400;
-export const StudentsCanvasWidth = 600;
+export const StudentsCanvasWidth = 500;
 
 export const MIN_Confidence = 0.5;
 
@@ -305,10 +305,14 @@ class StudentsP5 extends React.Component {
     setupCharacters = (p5) => {
         let _this = this;
         let characters = [];
-        for (let i = 0; i < _this.state.studentsData.length; i++) {
-            let student = _this.state.studentsData[i];
-            if (student.data.isHost) continue;
-            if (student.data.isPresent === false) continue;
+
+        let studentsData = this.state.studentsData;
+        studentsData = studentsData.filter((student) => {
+            return student.data.isHost === false && student.data.isPresent;
+        });
+
+        for (let i = 0; i < studentsData.length; i++) {
+            let student = studentsData[i];
             let character = new Student(
                 { sketch: p5, IMAGES: _this.IMAGES },
                 _this.POSITIONS[i][0],
