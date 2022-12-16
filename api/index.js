@@ -26,6 +26,7 @@ const path = require("path");
 
 const app = express();
 
+// Serve static files from the React app if in production
 if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "public")));
     app.get("/*", function (req, res) {
@@ -46,6 +47,7 @@ const httpServer = createServer(app, {
 
 const io = new Server(httpServer);
 
+// Admin UI for Socket.io
 instrument(io, {
     auth: {
         type: "basic",
@@ -55,6 +57,8 @@ instrument(io, {
     mode: "development",
 });
 
+
+// Socket.io events
 io.on("connection", (socket) => {
     console.log("New Connection: ", socket.id);
 
@@ -64,10 +68,13 @@ io.on("connection", (socket) => {
     });
 
     socket.on("join_classroom", (data) => {
+        // validate the data
         const { error } = joinClassroomValidator(data);
         if (error) {
+            // send the error message to the client
             socket.emit("Error", error.details[0].message);
         } else {
+            // set the socket data
             socket.data.user = data.username;
             socket.data.armRaised = false;
             socket.data.isPresent = false;
@@ -76,8 +83,8 @@ io.on("connection", (socket) => {
     });
 
     socket.on("create_classroom", (data) => {
+        // validate the data
         const { error } = createClassroomValidator(data);
-        console.log(data);
         if (error) {
             socket.emit("Error", error.details[0].message);
         } else {
@@ -108,6 +115,7 @@ io.on("connection", (socket) => {
         if (error) {
             socket.emit("Error", error.details[0].message);
         } else {
+            // set the socket data
             socket.data.armRaised = data.armRaised;
             socket.data.isPresent = data.isPresent;
             update_students_all(io);

@@ -1,7 +1,7 @@
 const Classroom = require("./Classroom");
 const sequelize = require("../database/sequelize");
 
-// Sync
+// Sync the database
 sequelize.sync().then(() => {
     console.log("Database & tables created!");
 });

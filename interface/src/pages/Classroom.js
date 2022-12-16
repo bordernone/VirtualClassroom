@@ -20,21 +20,23 @@ function Classroom() {
     const [socket] = useOutletContext();
     const { state } = useLocation();
 
+    // Get the search params from the url
     const [searchParams, setSearchParams] = useSearchParams();
-    const { classroomId } = useParams();
+    const { classroomId } = useParams(); // Get the classroom id from the url
 
     const [data, setData] = React.useState(state);
 
     useEffect(() => {
         if (!state) {
             let joinPassword = searchParams.get("joinPassword");
-            // Buffer decode
+            // Decode the join password
             joinPassword = Buffer.from(joinPassword, "base64").toString(
                 "ascii"
             );
 
             let username = prompt("Enter your name");
 
+            // Join the classroom
             socket.emit("join_classroom", {
                 username,
                 classroomId,
@@ -53,6 +55,7 @@ function Classroom() {
         };
     }, []);
 
+    // Get the shareable link with the join password encoded
     const getShareableLink = () => {
         if (!data) return "";
         let joinPassword;

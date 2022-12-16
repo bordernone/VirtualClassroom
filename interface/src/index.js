@@ -16,14 +16,18 @@ import Homepage from "./pages/Homepage";
 import store from "./redux/store";
 import reportWebVitals from "./reportWebVitals";
 
+// import the store
 let persistor = persistStore(store);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
+
+// Create the router with the routes to the pages
 const router = createBrowserRouter([
     {
         path: "/",
         element: (
+            // Wrap the app with the redux store
             <Provider store={store}>
                 <PersistGate loading={null} persistor={persistor}>
                     <App />

@@ -1,11 +1,12 @@
 class Student {
+    // Constructor
     constructor({ sketch, IMAGES }, x, y, name) {
         this.x = x;
         this.y = y;
         this.sketch = sketch;
         this.name = name;
         this.IMAGES = IMAGES;
-        this.state = "idle";
+        this.state = "idle"; // possible states: idle, arm_raised
 
         this.width = 150;
         this.height = 150;
@@ -13,6 +14,7 @@ class Student {
 
     draw() {
         if (this.state === "idle") {
+            // Draw idle image
             this.sketch.image(
                 this.IMAGES.character_idle,
                 this.x,
@@ -21,6 +23,7 @@ class Student {
                 this.height
             );
         } else if (this.state === "arm_raised") {
+            // Draw arm raised image
             this.sketch.image(
                 this.IMAGES.character_arm_raised,
                 this.x,
@@ -30,9 +33,11 @@ class Student {
             );
         }
 
+        // Draw name of student
         this.addText(this.name);
     }
 
+    // Add text to student
     addText(text) {
         let offsetX = this.width / 2;
         let offsetYPercent = 60;
@@ -59,6 +64,5 @@ class Student {
         this.state = "idle";
     }
 }
-
 
 export default Student;

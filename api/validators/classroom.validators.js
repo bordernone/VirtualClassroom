@@ -1,5 +1,6 @@
 const Joi = require("joi");
 
+// Validate the payload for the create classroom route
 const createClassroomValidator = (payload) => {
     const schema = Joi.object({
         hostName: Joi.string().required(),
@@ -8,6 +9,7 @@ const createClassroomValidator = (payload) => {
     return schema.validate(payload);
 };
 
+// Validate the payload for the join classroom route
 const joinClassroomValidator = (payload) => {
     const schema = Joi.object({
         classroomId: Joi.string().required(),
@@ -17,6 +19,7 @@ const joinClassroomValidator = (payload) => {
     return schema.validate(payload);
 };
 
+// Validate the payload for the draw whiteboard route
 const drawWhiteboardValidator = (payload) => {
     const schema = Joi.object({
         classroomId: Joi.string().required(),
@@ -32,6 +35,7 @@ const drawWhiteboardValidator = (payload) => {
     return schema.validate(payload);
 };
 
+// Validate the payload for the students update route
 const studentsUpdateValidator = (payload) => {
     const schema = Joi.object({
         classroomId: Joi.string().required(),
@@ -39,6 +43,7 @@ const studentsUpdateValidator = (payload) => {
     return schema.validate(payload);
 };
 
+// Validate the payload for the update student status route
 const updateStudentStatus = (payload) => {
     const schema = Joi.object({
         armRaised: Joi.boolean().required(),
@@ -47,6 +52,7 @@ const updateStudentStatus = (payload) => {
     return schema.validate(payload);
 };
 
+// Validate the payload for the clear whiteboard route
 const clearWhiteboardValidator = (payload) => {
     const schema = Joi.object({
         classroomId: Joi.string().required(),

@@ -1,5 +1,6 @@
 const { Sequelize } = require("sequelize");
 
+// Setup the database and dialect
 const sequelize = new Sequelize({
     dialect: "sqlite",
     storage: "database.sqlite",
@@ -7,6 +8,7 @@ const sequelize = new Sequelize({
 
 async function connect() {
     try {
+        // Test the connection
         await sequelize.authenticate();
         console.log("Connection has been established successfully.");
     } catch (error) {
@@ -14,6 +16,7 @@ async function connect() {
     }
 }
 
+// Connect to the database
 connect();
 
 module.exports = sequelize;

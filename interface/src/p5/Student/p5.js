@@ -33,6 +33,7 @@ class StudentsP5 extends React.Component {
         this.socket = this.props.socket;
         this.state = { ...this.props.state, loading: true };
 
+        // Hardcoded positions for the characters
         this.POSITIONS = [
             [0, 0],
             [150, 0],
@@ -47,6 +48,7 @@ class StudentsP5 extends React.Component {
 
     componentDidMount() {
         let _this = this;
+        // Listen for students update
         this.socket.on("students_update", (data) => {
             console.log("students_update", data);
             // Set the students data with callback
@@ -61,8 +63,10 @@ class StudentsP5 extends React.Component {
             );
         });
 
+        //  setup poseNet
         this.setupPoseNet(this.p5);
 
+        // Listen for arm status change and presence change
         window.addEventListener("arm_status_change", this.onArmStatusChange);
         window.addEventListener(
             "presence_status_change",
@@ -71,6 +75,7 @@ class StudentsP5 extends React.Component {
     }
 
     componentWillUnmount() {
+        // Remove the event listeners
         this.poseNet.removeListener("pose", this.onPoseNet);
         this.socket.off("students_update");
         clearInterval(this.ping);
@@ -78,7 +83,7 @@ class StudentsP5 extends React.Component {
 
     setupPoseNet = (p5) => {
         const video = this.videoRef.current;
-
+        // Setup the video
         var facingMode = "user"; // 'user' for the front camera or 'environment' for the back camera
         var constraints = {
             audio: false, // Audio is not required.
@@ -87,12 +92,14 @@ class StudentsP5 extends React.Component {
             },
         };
 
+        // Get the video stream
         navigator.mediaDevices
             .getUserMedia(constraints)
             .then(function success(stream) {
                 video.srcObject = stream;
             });
 
+        // Setup the poseNet model
         this.poseNet = ml5.poseNet(video, () => {
             console.log("Model loaded!");
 
@@ -102,6 +109,7 @@ class StudentsP5 extends React.Component {
             });
 
             let _this = this;
+            // Ping the server every second to get the students data
             this.ping = setInterval(() => {
                 _this.socket.emit("students_update", {
                     classroomId: _this.state.classroomId,
@@ -115,10 +123,12 @@ class StudentsP5 extends React.Component {
     };
 
     onPoseNet = (poses) => {
+        // Add the pose to the history
         if (poses.length > 0) {
             this.posesHistory.push(poses[0].pose);
         }
 
+        // Keep the history to 10 poses
         if (this.posesHistory.length > 10) {
             this.posesHistory.shift();
         }
@@ -232,7 +242,7 @@ class StudentsP5 extends React.Component {
     leftArmRaised = (pose) => {
         let leftWrist = pose.leftWrist;
         let leftShoulder = pose.leftShoulder;
-
+        // Check if the left wrist is above the left shoulder
         if (
             leftWrist.confidence > MIN_Confidence &&
             leftShoulder.confidence > MIN_Confidence
@@ -252,6 +262,7 @@ class StudentsP5 extends React.Component {
         let rightWrist = pose.rightWrist;
         let rightShoulder = pose.rightShoulder;
 
+        // Check if the right wrist is above the right shoulder
         if (
             rightWrist.confidence > MIN_Confidence &&
             rightShoulder.confidence > MIN_Confidence
@@ -267,8 +278,10 @@ class StudentsP5 extends React.Component {
         return false;
     };
 
+    // Add in future versions
     isLookingAtScreen = (pose) => {
-        return true; // TODO: Add in future versions
+        return true;
+        // TODO: Add in future versions. The following code is not working properly
         // let leftEye = pose.leftEye;
         // let rightEye = pose.rightEye;
 
@@ -287,6 +300,7 @@ class StudentsP5 extends React.Component {
     onArmStatusChange = (e) => {
         let isRaised = e.detail.isRaised;
         console.log("isRaised:", isRaised);
+        // Update the arm status when the arm is raised
         this.socket.emit("update_status", {
             armRaised: isRaised,
             isPresent: this.characterPresent,
@@ -296,29 +310,35 @@ class StudentsP5 extends React.Component {
     onPresenceStatusChange = (e) => {
         let isPresent = e.detail.isPresent;
         console.log("isPresent:", isPresent);
+        // Update the arm status when the presence status changes
         this.socket.emit("update_status", {
             isPresent: isPresent,
             armRaised: this.characterArmRaised,
         });
     };
 
+    // Load the character images
     setupCharacters = (p5) => {
         let _this = this;
         let characters = [];
 
         let studentsData = this.state.studentsData;
+        // Filter out the host and the students who are not present
         studentsData = studentsData.filter((student) => {
             return student.data.isHost === false && student.data.isPresent;
         });
 
+        // Create the characters
         for (let i = 0; i < studentsData.length; i++) {
             let student = studentsData[i];
+            // Create the character using hard-coded positions
             let character = new Student(
                 { sketch: p5, IMAGES: _this.IMAGES },
                 _this.POSITIONS[i][0],
                 _this.POSITIONS[i][1],
                 student.data.user
             );
+            // Set the arm raised status
             if (student.data.armRaised) {
                 character.raiseArm();
             }
@@ -355,6 +375,7 @@ class StudentsP5 extends React.Component {
             }
         });
 
+        // Draw the host present text: whether the host is present or not
         this.drawHostPresentText(p5);
     };
 
@@ -364,16 +385,18 @@ class StudentsP5 extends React.Component {
             p5.fill(200);
             p5.circle(StudentsCanvasWidth - 10, 10, 10);
         } else {
+            // Draw green circle if host is present
             p5.fill(0, 255, 0);
             p5.circle(StudentsCanvasWidth - 10, 10, 10);
         }
     };
 
     isHostPresent = () => {
+        // Find the host
         let host = this.state.studentsData?.find((student) => {
             return student.data.isHost;
         });
-
+        // Return true if the host is present
         return !!host;
     };
 

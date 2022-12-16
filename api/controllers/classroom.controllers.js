@@ -15,6 +15,7 @@ const join_classroom = (
     })
         .then((classroom) => {
             if (classroom) {
+                // User is the host
                 socket.data.isHost = true;
                 socket.join(classroom.id);
                 socket.emit("join_classroom", {
@@ -76,7 +77,9 @@ const start_classroom = (_io, socket, classroomId, hostPassword) => {
             },
         })
             .then((classroom) => {
+                // If the classroom exists
                 if (classroom) {
+                    // Join the classroom and emit the start event
                     socket.join(classroomId);
                     console.log("Started Classroom: ", classroomId);
                     socket.emit("start_classroom", {
@@ -109,6 +112,7 @@ const create_classroom = (_io, socket, { hostName, hostPassword }) => {
         joinPassword: joinPassword,
     })
         .then((classroom) => {
+            // Creation successful, emit the event
             socket.emit("create_classroom", {
                 success: true,
                 message: "Created Classroom",
@@ -173,11 +177,6 @@ const update_students = (io, classroomId) => {
         let studentSocketData = studentsSocket.map((student) => {
             return { data: student.data, id: student.id };
         });
-
-        // // Exclude the host from the students
-        // studentSocketData = studentSocketData.filter(
-        //     (student) => student.data.isHost === false
-        // );
 
         io.to(classroomId).emit("students_update", studentSocketData);
     } catch (err) {

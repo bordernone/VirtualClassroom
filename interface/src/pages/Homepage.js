@@ -27,6 +27,7 @@ function Homepage() {
 
     useEffect(() => {
         socket.on("create_classroom", (data) => {
+            // Classroom created successfully, print the classroom id and join password
             console.log("create ", data);
             setClassroomId(data.classroomId);
             setSuccessText(data);
@@ -39,7 +40,10 @@ function Homepage() {
         socket.on("join_classroom", (data) => {
             console.log(data);
             toast.success("Joined classroom successfully. Redirecting...");
+
+            // Get the public join password
             let publicJoinPassword_ = publicJoinPasswordRef.current;
+            // Redirect to the classroom page after 2 seconds
             setTimeout(() => {
                 let url = `/classroom/${data.classroomId}`;
                 navigate(url, {
@@ -67,6 +71,7 @@ function Homepage() {
         });
     };
 
+    // Join classroom
     const joinClassroom = (username, classroomId, joinPassword) => {
         socket.emit("join_classroom", {
             username,
@@ -75,6 +80,7 @@ function Homepage() {
         });
     };
 
+    // Create classroom form submit
     const onFormSubmit = (e) => {
         e.preventDefault();
         let username = e.target.username.value;
@@ -84,6 +90,7 @@ function Homepage() {
         joinClassroom(username, classroomId, joinPassword);
     };
 
+    // Get shareable link
     const getShareableLink = () => {
         return (
             `${window.location.origin}/classroom/` +

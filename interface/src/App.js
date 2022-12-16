@@ -13,11 +13,13 @@ export default function App() {
             console.log("Connected to server");
         });
 
+        // Listen for errors globally. This is used to display errors to the user
         socket.on("Error", (data) => {
             toast.error(data);
         });
 
         return () => {
+            // Remove all the listeners
             socket.off("connect");
             socket.off("Error");
             socket.disconnect();
@@ -28,8 +30,9 @@ export default function App() {
         <>
             <Navbar />
             <div className="container body">
+                {/* Pass the socket to the pages. Setup the outlet */}
                 <Outlet context={[socket]} />
-                <ToastContainer />
+                <ToastContainer /> {/* Toasts */}
             </div>
             <Footer />
         </>
